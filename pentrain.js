@@ -76,14 +76,15 @@ loadImages(sources, function (images) {
         y0: 430,
         y: 430,
         g: -200,
-        v: 180,
+        vx: 180,
+        vy: 100,
         t0x: 0,
         tx: 0,
         t0y: 0,
         ty: 0,
         dropped: false,
         drop: false,
-        landed() { return (this.y < 40) && this.tx > 1; },
+        landed() { return (this.y < 60) && this.tx > 1; },
         draw() { rotateAndDrawImage(images.basketball, this.x, this.y, 0, 0.25); }
     }
 
@@ -103,6 +104,8 @@ loadImages(sources, function (images) {
         basketball.dropped = true;
     }
 
+    //////////////////////////////////////////////////////////REMOVE
+    let nn = 0;
     function draw() {
         main_ctx.clearRect(0, 0, main_layer.width, main_layer.height);
 
@@ -111,10 +114,10 @@ loadImages(sources, function (images) {
             basketball.ty = (Date.now() - basketball.t0y) / 1000;
             train.t = (Date.now() - train.t0) / 1000;
 
-            basketball.x = basketball.x0 + basketball.v * basketball.tx;
+            basketball.x = basketball.x0 + basketball.vx * basketball.tx;
 
             if (basketball.dropped) {
-                basketball.y = basketball.y0 + 0.5 * basketball.g * basketball.ty * basketball.ty;
+                basketball.y = basketball.y0 + basketball.vy * basketball.ty + 0.5 * basketball.g * basketball.ty * basketball.ty;
             }
 
             if ((basketball.x > 200) && !basketball.dropped && basketball.drop) {
@@ -134,13 +137,31 @@ loadImages(sources, function (images) {
             if (loop) {
                 if ((train.x > 1400) || ((ex == 1) && (basketball.ty > 4))) {
                     initialize();
-                } 
+                }
             }
 
         }
 
+ 
+        //console.log(basketball.ty)
+        nn++;
+        if (nn > 100) {
+            
+            //console.log(Math.round(basketball.vy), Math.round(basketball.g * basketball.ty));
+            nn = 0;
+        }
+
         if (basketball.landed()) {
-            //console.log("LANDED")
+            //console.log("HERE")
+            //go = false;
+            basketball.vy = - 0.9 * basketball.g * basketball.ty;
+            basketball.t0y = Number(Date.now());
+            basketball.y += 4;
+            basketball.y0 = basketball.y;
+            //console.log(basketball.ty)
+            //console.log(Math.round(basketball.vy), Math.round(basketball.g * basketball.ty));
+            console.log(basketball.vy)
+            //console.log(basketball.g * basketball.ty)
         }
 
         train.draw();
@@ -155,7 +176,7 @@ loadImages(sources, function (images) {
         n = 0;
 
         basketball.drop = dropping[ex];
-        basketball.v = basketball_velocities[ex];
+        basketball.vx = basketball_velocities[ex];
         train.v = train_velocities[ex];
         train.x0 = trainx[ex];
         basketball.x0 = basketballx0[ex];
@@ -193,7 +214,7 @@ loadImages(sources, function (images) {
     ]
     const dropping = [false, true, true];
     const train_velocities = [train.v, 0, train.v];
-    const basketball_velocities = [basketball.v, 0, basketball.v];
+    const basketball_velocities = [basketball.vx, 0, basketball.vx];
     const trainx = [train.x, 500, train.x];
     const basketballx0 = [basketball.x0, 350, basketball.x0];
 
