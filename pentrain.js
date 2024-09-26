@@ -77,15 +77,20 @@ loadImages(sources, function (images) {
         y: 430,
         g: -200,
         vx: 180,
-        vy: 100,
+        vy: 0,
         t0x: 0,
         tx: 0,
         t0y: 0,
         ty: 0,
         dropped: false,
         drop: false,
-        landed() { return (this.y < 60) && this.tx > 1; },
-        draw() { rotateAndDrawImage(images.basketball, this.x, this.y, 0, 0.25); }
+        bounced: false,
+        landed() {
+            return (this.y < 60) && this.tx > 1;
+        },
+        draw() {
+            rotateAndDrawImage(images.basketball, this.x, this.y, 0, 0.25);
+        }
     }
 
     const train = {
@@ -95,13 +100,16 @@ loadImages(sources, function (images) {
         v: 180,
         t0: 0,
         t: 0,
-        draw() { rotateAndDrawImage(this.image, this.x, 220, Math.PI, 0.18); }
+        draw() {
+            rotateAndDrawImage(this.image, this.x, 220, Math.PI, 0.18);
+        }
     }
 
     function dropBasketBall() {
         train.image = images.traindropped;
         basketball.t0y = Number(Date.now());
         basketball.dropped = true;
+        console.log("HERE")
     }
 
     //////////////////////////////////////////////////////////REMOVE
@@ -117,7 +125,7 @@ loadImages(sources, function (images) {
             basketball.x = basketball.x0 + basketball.vx * basketball.tx;
 
             if (basketball.dropped) {
-                basketball.y = basketball.y0 + basketball.vy * basketball.ty + 0.5 * basketball.g * basketball.ty * basketball.ty;
+                basketball.y = basketball.y0 + basketball.vy * basketball.ty + 0.5 * basketball.g * basketball.ty ** 2;
             }
 
             if ((basketball.x > 200) && !basketball.dropped && basketball.drop) {
@@ -142,26 +150,13 @@ loadImages(sources, function (images) {
 
         }
 
- 
-        //console.log(basketball.ty)
-        nn++;
-        if (nn > 100) {
-            
-            //console.log(Math.round(basketball.vy), Math.round(basketball.g * basketball.ty));
-            nn = 0;
-        }
-
         if (basketball.landed()) {
-            //console.log("HERE")
-            //go = false;
+            if (basketball.bounced) { basketball.ty /= 2; }
             basketball.vy = - 0.9 * basketball.g * basketball.ty;
             basketball.t0y = Number(Date.now());
             basketball.y += 4;
             basketball.y0 = basketball.y;
-            //console.log(basketball.ty)
-            //console.log(Math.round(basketball.vy), Math.round(basketball.g * basketball.ty));
-            console.log(basketball.vy)
-            //console.log(basketball.g * basketball.ty)
+            basketball.bounced = true;
         }
 
         train.draw();
@@ -174,6 +169,8 @@ loadImages(sources, function (images) {
         path_ctx.clearRect(0, 0, path_layer.width, path_layer.height);
 
         n = 0;
+
+        basketball.bounced = false;
 
         basketball.drop = dropping[ex];
         basketball.vx = basketball_velocities[ex];
