@@ -109,18 +109,16 @@ loadImages(sources, function (images) {
         train.image = images.traindropped;
         basketball.t0y = Number(Date.now());
         basketball.dropped = true;
-        console.log("HERE")
     }
-
-    //////////////////////////////////////////////////////////REMOVE
+    // REMOVE /////////////////////////////////////////////////////////////////////
     let nn = 0;
     function draw() {
         main_ctx.clearRect(0, 0, main_layer.width, main_layer.height);
 
         if (go) {
-            basketball.tx = (Date.now() - basketball.t0x) / 1000;
-            basketball.ty = (Date.now() - basketball.t0y) / 1000;
-            train.t = (Date.now() - train.t0) / 1000;
+            basketball.tx = (Date.now() - basketball.t0x) / 5000;
+            basketball.ty = (Date.now() - basketball.t0y) / 5000;
+            train.t = (Date.now() - train.t0) / 5000;
 
             basketball.x = basketball.x0 + basketball.vx * basketball.tx;
 
@@ -154,13 +152,19 @@ loadImages(sources, function (images) {
             if (basketball.bounced) { basketball.ty /= 2; }
             basketball.vy = - 0.9 * basketball.g * basketball.ty;
             basketball.t0y = Number(Date.now());
-            basketball.y += 4;
+            basketball.y += 1;
             basketball.y0 = basketball.y;
             basketball.bounced = true;
         }
 
         train.draw();
         basketball.draw();
+
+        nn++;
+        if (nn > 500) {
+            console.log(basketball.y)
+            nn = 0;
+        }
 
         raf = window.requestAnimationFrame(draw);
     }
