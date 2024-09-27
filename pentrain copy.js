@@ -13,8 +13,6 @@ const exampleBtns = document.querySelectorAll(".exampleBtns");
 const whichEx = document.getElementById("ex");
 const message = document.getElementById("message");
 
-const g = -200;
-
 // Controls the frequency of dots drawn    
 let f = 0.05;
 let n = 0;
@@ -77,6 +75,7 @@ loadImages(sources, function (images) {
         x: -470,
         y0: 430,
         y: 430,
+        g: -200,
         vx: 180,
         vy: 0,
         t0x: 0,
@@ -85,6 +84,7 @@ loadImages(sources, function (images) {
         ty: 0,
         dropped: false,
         drop: false,
+        bounced: false,
         landed() {
             return (this.y < 60) && this.tx > 1;
         },
@@ -116,14 +116,14 @@ loadImages(sources, function (images) {
         main_ctx.clearRect(0, 0, main_layer.width, main_layer.height);
 
         if (go) {
-            basketball.tx = (Date.now() - basketball.t0x) / 2000;
-            basketball.ty = (Date.now() - basketball.t0y) / 2000;
-            train.t = (Date.now() - train.t0) / 2000;
+            basketball.tx = (Date.now() - basketball.t0x) / 5000;
+            basketball.ty = (Date.now() - basketball.t0y) / 5000;
+            train.t = (Date.now() - train.t0) / 5000;
 
             basketball.x = basketball.x0 + basketball.vx * basketball.tx;
 
             if (basketball.dropped) {
-                basketball.y = basketball.y0 + basketball.vy * basketball.ty + 0.5 * g * basketball.ty ** 2;
+                basketball.y = basketball.y0 + basketball.vy * basketball.ty + 0.5 * basketball.g * basketball.ty ** 2;
             }
 
             if ((basketball.x > 200) && !basketball.dropped && basketball.drop) {
@@ -149,13 +149,12 @@ loadImages(sources, function (images) {
         }
 
         if (basketball.landed()) {
-            basketball.y0 = 430;
-            basketball.vy = Math.sqrt(Math.abs(2*g*basketball.y0));
-            console.log("P", basketball.vy)
-            basketball.vy = 300;
+            if (basketball.bounced) { basketball.ty /= 2; }
+            basketball.vy = - 0.9 * basketball.g * basketball.ty;
             basketball.t0y = Number(Date.now());
             basketball.y += 1;
             basketball.y0 = basketball.y;
+            basketball.bounced = true;
         }
 
         train.draw();
@@ -163,7 +162,7 @@ loadImages(sources, function (images) {
 
         nn++;
         if (nn > 500) {
-            console.log(Math.round(basketball.y), Math.round(basketball.vy))
+            console.log(basketball.y)
             nn = 0;
         }
 
