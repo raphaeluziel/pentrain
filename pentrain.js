@@ -84,7 +84,7 @@ loadImages(sources, function (images) {
         t0y: 0,
         ty: 0,
         dropped: false,
-        drop: false,
+        drop: true,
         landed() {
             return (this.y < 60) && this.tx > 1;
         },
@@ -105,10 +105,31 @@ loadImages(sources, function (images) {
         }
     }
 
+    const basketballArr = [];
+    const trainArr = [];
+    for (let i = 0; i < 3; i++) {
+        basketballArr.push(Object.create(basketball));
+        trainArr.push(Object.create(train));
+    }
+
+    // Example 1
+    basketballArr[0].drop = false;
+
+    // Example 2
+    basketballArr[1].vx = 0;
+    basketballArr[1].x0 = 350;
+    basketballArr[1].x = 350;
+    trainArr[1].v = 0;
+    trainArr[1].x0 = 500;
+    trainArr[1].x = 500;
+
+    // Example 3
+    // Nothing to change
+
     function dropBasketBall() {
-        train.image = images.traindropped;
-        basketball.t0y = Number(Date.now());
-        basketball.dropped = true;
+        trainArr[ex].image = images.traindropped;
+        basketballArr[ex].t0y = Number(Date.now());
+        basketballArr[ex].dropped = true;
     }
     // REMOVE /////////////////////////////////////////////////////////////////////
     let nn = 0;
@@ -116,54 +137,53 @@ loadImages(sources, function (images) {
         main_ctx.clearRect(0, 0, main_layer.width, main_layer.height);
 
         if (go) {
-            basketball.tx = (Date.now() - basketball.t0x) / 2000;
-            basketball.ty = (Date.now() - basketball.t0y) / 2000;
-            train.t = (Date.now() - train.t0) / 2000;
+            basketballArr[ex].tx = (Date.now() - basketballArr[ex].t0x) / 2000;
+            basketballArr[ex].ty = (Date.now() - basketballArr[ex].t0y) / 2000;
+            trainArr[ex].t = (Date.now() - trainArr[ex].t0) / 2000;
 
-            basketball.x = basketball.x0 + basketball.vx * basketball.tx;
+            basketballArr[ex].x = basketballArr[ex].x0 + basketballArr[ex].vx * basketballArr[ex].tx;
 
-            if (basketball.dropped) {
-                basketball.y = basketball.y0 + basketball.vy * basketball.ty + 0.5 * g * basketball.ty ** 2;
+            if (basketballArr[ex].dropped) {
+                basketballArr[ex].y = basketballArr[ex].y0 + basketballArr[ex].vy * basketballArr[ex].ty + 0.5 * g * basketballArr[ex].ty ** 2;
             }
 
-            if ((basketball.x > 200) && !basketball.dropped && basketball.drop) {
+            if ((basketballArr[ex].x > 200) && !basketballArr[ex].dropped && basketballArr[ex].drop) {
                 if (ex != 1) { dropBasketBall(); }
-                else if (basketball.ty > 0.5) { dropBasketBall(); }
+                else if (basketballArr[ex].ty > 0.5) { dropBasketBall(); }
             }
 
-            train.x = train.x0 + train.v * train.t;
+            trainArr[ex].x = trainArr[ex].x0 + trainArr[ex].v * trainArr[ex].t;
 
-            if (basketball.tx > n) {
-                dot.x = basketball.x;
-                dot.y = basketball.y;
+            if (basketballArr[ex].tx > n) {
+                dot.x = basketballArr[ex].x;
+                dot.y = basketballArr[ex].y;
                 dot.draw();
                 n += f;
             }
 
             if (loop) {
-                if ((train.x > 1400) || ((ex == 1) && (basketball.ty > 4))) {
+                if ((trainArr[ex].x > 1400) || ((ex == 1) && (basketballArr[ex].ty > 4))) {
                     initialize();
                 }
             }
 
         }
 
-        if (basketball.landed()) {
-            basketball.y0 = 430;
-            basketball.vy = Math.sqrt(Math.abs(2*g*basketball.y0));
-            console.log("P", basketball.vy)
-            basketball.vy = 300;
-            basketball.t0y = Number(Date.now());
-            basketball.y += 1;
-            basketball.y0 = basketball.y;
+        if (basketballArr[ex].landed()) {
+            basketballArr[ex].y0 = 430;
+            basketballArr[ex].vy = Math.sqrt(Math.abs(2*g*basketballArr[ex].y0));
+            basketballArr[ex].vy = 300;
+            basketballArr[ex].t0y = Number(Date.now());
+            basketballArr[ex].y += 1;
+            basketballArr[ex].y0 = basketballArr[ex].y;
         }
 
-        train.draw();
-        basketball.draw();
+        trainArr[ex].draw();
+        basketballArr[ex].draw();
 
         nn++;
-        if (nn > 500) {
-            console.log(Math.round(basketball.y), Math.round(basketball.vy))
+        if (nn > 200) {
+            console.log(Math.round(basketballArr[ex].y), Math.round(basketballArr[ex].vy))
             nn = 0;
         }
 
@@ -175,22 +195,20 @@ loadImages(sources, function (images) {
 
         n = 0;
 
-        basketball.bounced = false;
+        //basketball.drop = dropping[ex];
+        //basketball.vx = basketball_velocities[ex];
+        //train.v = train_velocities[ex];
+        //train.x0 = trainx[ex];
+        //basketball.x0 = basketballx0[ex];
 
-        basketball.drop = dropping[ex];
-        basketball.vx = basketball_velocities[ex];
-        train.v = train_velocities[ex];
-        train.x0 = trainx[ex];
-        basketball.x0 = basketballx0[ex];
-
-        basketball.dropped = false;
-        basketball.x = basketball.x0;
-        basketball.y = basketball.y0;
-        train.image = images.train;
-        train.x = train.x0;
-        basketball.t0x = Number(Date.now());
-        basketball.t0y = Number(Date.now());
-        train.t0 = Number(Date.now());
+        basketballArr[ex].dropped = false;
+        basketballArr[ex].x = basketballArr[ex].x0;
+        basketballArr[ex].y = basketballArr[ex].y0;
+        trainArr[ex].image = images.train;
+        trainArr[ex].x = trainArr[ex].x0;
+        basketballArr[ex].t0x = Number(Date.now());
+        basketballArr[ex].t0y = Number(Date.now());
+        trainArr[ex].t0 = Number(Date.now());
 
         draw();
     }
@@ -198,11 +216,6 @@ loadImages(sources, function (images) {
     startBtn.addEventListener("click", () => {
         initialize();
         go = true;
-    });
-
-    loopBtn.addEventListener("click", () => {
-        loop = loop ? false : true;
-        loopBtn.textContent = loop ? "Looping" : "Loop";
     });
 
     resetBtn.addEventListener("click", () => {
@@ -214,11 +227,11 @@ loadImages(sources, function (images) {
         "The basketball drops straight down vertically; there is no horizontal motion.",
         "The basketball is dropped while the train is moving horizontally.  This is a combination of the first two examples.",
     ]
-    const dropping = [false, true, true];
-    const train_velocities = [train.v, 0, train.v];
-    const basketball_velocities = [basketball.vx, 0, basketball.vx];
-    const trainx = [train.x, 500, train.x];
-    const basketballx0 = [basketball.x0, 350, basketball.x0];
+    //const dropping = [false, true, true];
+    //const train_velocities = [train.v, 0, train.v];
+    //const basketball_velocities = [basketball.vx, 0, basketball.vx];
+    //const trainx = [train.x, 500, train.x];
+    //const basketballx0 = [basketball.x0, 350, basketball.x0];
 
     for (let i = 0; i < exampleBtns.length; i++) {
         exampleBtns[i].addEventListener("click", () => {
