@@ -14,6 +14,8 @@ const whichEx = document.getElementById("ex");
 const message = document.getElementById("message");
 
 const g = -200;
+const INITIAL_HEIGHT = 430;
+const HORIZONTAL_SPEED = 180;
 
 // Controls the frequency of dots drawn    
 let f = 0.05;
@@ -21,6 +23,8 @@ let n = 0;
 
 let go = false;
 let loop = false;
+
+let playbackSpeed = 1.000;
 
 let ex = 0;
 
@@ -75,9 +79,9 @@ loadImages(sources, function (images) {
     const basketball = {
         x0: -470,
         x: -470,
-        y0: 430,
-        y: 430,
-        vx: 180,
+        y0: INITIAL_HEIGHT,
+        y: INITIAL_HEIGHT,
+        vx: HORIZONTAL_SPEED,
         vy: 0,
         t0x: 0,
         tx: 0,
@@ -97,7 +101,7 @@ loadImages(sources, function (images) {
         image: images.train,
         x0: -320,
         x: -320,
-        v: 180,
+        v: HORIZONTAL_SPEED,
         t0: 0,
         t: 0,
         draw() {
@@ -131,15 +135,14 @@ loadImages(sources, function (images) {
         basketballArr[ex].t0y = Number(Date.now());
         basketballArr[ex].dropped = true;
     }
-    // REMOVE /////////////////////////////////////////////////////////////////////
-    let nn = 0;
+
     function draw() {
         main_ctx.clearRect(0, 0, main_layer.width, main_layer.height);
 
         if (go) {
-            basketballArr[ex].tx = (Date.now() - basketballArr[ex].t0x) / 2000;
-            basketballArr[ex].ty = (Date.now() - basketballArr[ex].t0y) / 2000;
-            trainArr[ex].t = (Date.now() - trainArr[ex].t0) / 2000;
+            basketballArr[ex].tx = playbackSpeed * (Date.now() - basketballArr[ex].t0x) / 1000;
+            basketballArr[ex].ty = playbackSpeed * (Date.now() - basketballArr[ex].t0y) / 1000;
+            trainArr[ex].t = playbackSpeed * (Date.now() - trainArr[ex].t0) / 1000;
 
             basketballArr[ex].x = basketballArr[ex].x0 + basketballArr[ex].vx * basketballArr[ex].tx;
 
@@ -171,7 +174,7 @@ loadImages(sources, function (images) {
 
         if (basketballArr[ex].landed()) {
             basketballArr[ex].y0 = 430;
-            basketballArr[ex].vy = Math.sqrt(Math.abs(2*g*basketballArr[ex].y0));
+            basketballArr[ex].vy = Math.sqrt(Math.abs(2 * g * basketballArr[ex].y0));
             basketballArr[ex].vy = 300;
             basketballArr[ex].t0y = Number(Date.now());
             basketballArr[ex].y += 1;
@@ -181,33 +184,27 @@ loadImages(sources, function (images) {
         trainArr[ex].draw();
         basketballArr[ex].draw();
 
-        nn++;
-        if (nn > 200) {
-            console.log(Math.round(basketballArr[ex].y), Math.round(basketballArr[ex].vy))
-            nn = 0;
-        }
-
         raf = window.requestAnimationFrame(draw);
     }
 
     function initialize() {
         path_ctx.clearRect(0, 0, path_layer.width, path_layer.height);
 
+        playbackSpeed = document.querySelector("input[name='playbackSpeed']:checked").value;
+
         n = 0;
 
-        //basketball.drop = dropping[ex];
-        //basketball.vx = basketball_velocities[ex];
-        //train.v = train_velocities[ex];
-        //train.x0 = trainx[ex];
-        //basketball.x0 = basketballx0[ex];
-
         basketballArr[ex].dropped = false;
+
         basketballArr[ex].x = basketballArr[ex].x0;
-        basketballArr[ex].y = basketballArr[ex].y0;
+        basketballArr[ex].y0 = INITIAL_HEIGHT;
+
         trainArr[ex].image = images.train;
         trainArr[ex].x = trainArr[ex].x0;
+
         basketballArr[ex].t0x = Number(Date.now());
         basketballArr[ex].t0y = Number(Date.now());
+
         trainArr[ex].t0 = Number(Date.now());
 
         draw();
@@ -222,16 +219,19 @@ loadImages(sources, function (images) {
         console.log("RESET")
     });
 
+    const playBackSpeedBtns = document.querySelectorAll(".playback");
+    playBackSpeedBtns.forEach( btn => {
+        btn.addEventListener("change", (e) => {
+            playbackSpeed = e.target.value;
+            //initialize();
+        });
+    });
+
     const messages = [
         "The basketball moves horizontally at constant speed; there is no vertical motion.",
         "The basketball drops straight down vertically; there is no horizontal motion.",
         "The basketball is dropped while the train is moving horizontally.  This is a combination of the first two examples.",
     ]
-    //const dropping = [false, true, true];
-    //const train_velocities = [train.v, 0, train.v];
-    //const basketball_velocities = [basketball.vx, 0, basketball.vx];
-    //const trainx = [train.x, 500, train.x];
-    //const basketballx0 = [basketball.x0, 350, basketball.x0];
 
     for (let i = 0; i < exampleBtns.length; i++) {
         exampleBtns[i].addEventListener("click", () => {
