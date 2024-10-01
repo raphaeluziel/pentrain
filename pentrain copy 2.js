@@ -79,7 +79,7 @@ function loadImages(sources, callback) {
 
 loadImages(sources, function (images) {
 
-    const ballProto = {
+    const basketball = {
         x0: BALL_INITIAL_BACK_X,
         x: BALL_INITIAL_BACK_X,
         y0: INITIAL_HEIGHT,
@@ -91,7 +91,7 @@ loadImages(sources, function (images) {
         ty0: 0,
         ty: 0,
         dropped: false,
-        drop: false,
+        drop: true,
         landed() {
             return (this.y < 60) && this.tx > 1;
         },
@@ -100,7 +100,7 @@ loadImages(sources, function (images) {
         }
     }
 
-    const trainProto = {
+    const train = {
         image: images.train,
         x0: TRAIN_INITIAL_BACK_X,
         x: TRAIN_INITIAL_BACK_X,
@@ -112,78 +112,74 @@ loadImages(sources, function (images) {
         }
     }
 
-    const ballArr = [];
+    const basketballArr = [];
     const trainArr = [];
     for (let i = 0; i < 3; i++) {
-        ballArr.push(Object.assign({}, ballProto));
-        trainArr.push(Object.assign({}, trainProto));
+        basketballArr.push(Object.create(basketball));
+        trainArr.push(Object.create(train));
     }
 
     // Example 1
-    // nothing to change
+    basketballArr[0].drop = false;
 
     // Example 2
-    ballArr[1].vx = 0;
-    ballArr[1].x0 = BALL_MID_X;
-    ballArr[1].x = BALL_MID_X;
-    ballArr[1].drop = true;
+    basketballArr[1].vx = 0;
+    basketballArr[1].x0 = BALL_MID_X;
+    basketballArr[1].x = BALL_MID_X;
     trainArr[1].v = 0;
     trainArr[1].x0 = TRAIN_MID_X;
     trainArr[1].x = TRAIN_MID_X;
 
     // Example 3
-    ballArr[2].drop = true;
-
-    let basketball = Object.assign({}, ballProto);
-    let train = Object.assign({}, trainProto);
+    // Nothing to change
 
     function dropBasketBall() {
-        train.image = images.traindropped;
-        basketball.ty0 = Number(Date.now());
-        basketball.dropped = true;
+        trainArr[ex].image = images.traindropped;
+        basketballArr[ex].ty0 = Number(Date.now());
+        basketballArr[ex].dropped = true;
     }
 
     function draw() {
         main_ctx.clearRect(0, 0, main_layer.width, main_layer.height);
 
         if (go) {
-            basketball.tx = playbackSpeed * (Date.now() - basketball.tx0) / 1000;
-            basketball.ty = playbackSpeed * (Date.now() - basketball.ty0) / 1000;
-            train.t = playbackSpeed * (Date.now() - train.t0) / 1000;
+            basketballArr[ex].tx = playbackSpeed * (Date.now() - basketballArr[ex].tx0) / 1000;
+            basketballArr[ex].ty = playbackSpeed * (Date.now() - basketballArr[ex].ty0) / 1000;
+            trainArr[ex].t = playbackSpeed * (Date.now() - trainArr[ex].t0) / 1000;
 
-            basketball.x = basketball.x0 + basketball.vx * basketball.tx;
+            basketballArr[ex].x = basketballArr[ex].x0 + basketballArr[ex].vx * basketballArr[ex].tx;
 
-            if (basketball.dropped) {
-                basketball.y = basketball.y0 + basketball.vy * basketball.ty + 0.5 * G * basketball.ty ** 2;
+            if (basketballArr[ex].dropped) {
+                basketballArr[ex].y = basketballArr[ex].y0 + basketballArr[ex].vy * basketballArr[ex].ty + 0.5 * G * basketballArr[ex].ty ** 2;
             }
 
-            if ((basketball.x > 100) && !basketball.dropped && basketball.drop) {
+            if ((basketballArr[ex].x > 100) && !basketballArr[ex].dropped && basketballArr[ex].drop) {
                 if (ex != 1) { dropBasketBall(); }
-                else if (basketball.ty > 0.5) { dropBasketBall(); }
+                else if (basketballArr[ex].ty > 0.5) { dropBasketBall(); }
             }
 
-            train.x = train.x0 + train.v * train.t;
+            trainArr[ex].x = trainArr[ex].x0 + trainArr[ex].v * trainArr[ex].t;
 
-            if (basketball.tx > n) {
-                dot.x = basketball.x;
-                dot.y = basketball.y;
+            if (basketballArr[ex].tx > n) {
+                dot.x = basketballArr[ex].x;
+                dot.y = basketballArr[ex].y;
                 dot.draw();
                 n += f;
             }
 
         }
 
-        if (basketball.landed()) {
-            basketball.vy = Math.sqrt(Math.abs(2 * G * basketball.y0));
-            console.log(basketball.vy);
-            basketball.vy = 300;
-            basketball.ty0 = Number(Date.now());
-            basketball.y += 1;
-            basketball.y0 = basketball.y;
+        if (basketballArr[ex].landed()) {
+            basketballArr[ex].y0 = 430;
+            basketballArr[ex].vy = Math.sqrt(Math.abs(2 * G * basketballArr[ex].y0));
+            basketballArr[ex].vy = 300;
+            basketballArr[ex].ty0 = Number(Date.now());
+            basketballArr[ex].y += 1;
+            basketballArr[ex].y0 = basketballArr[ex].y;
         }
 
-        train.draw();
-        basketball.draw();
+        trainArr[ex].draw();
+        basketballArr[ex].draw();
 
         raf = window.requestAnimationFrame(draw);
     }
@@ -195,18 +191,18 @@ loadImages(sources, function (images) {
 
         n = 0;
 
-        basketball.dropped = false;
+        basketballArr[ex].dropped = false;
 
-        basketball.x = basketball.x0;
-        basketball.y0 = INITIAL_HEIGHT;
+        basketballArr[ex].x = basketballArr[ex].x0;
+        basketballArr[ex].y0 = INITIAL_HEIGHT;
 
-        train.image = images.train;
-        train.x = train.x0;
+        trainArr[ex].image = images.train;
+        trainArr[ex].x = trainArr[ex].x0;
 
-        basketball.tx0 = Number(Date.now());
-        basketball.ty0 = Number(Date.now());
+        basketballArr[ex].tx0 = Number(Date.now());
+        basketballArr[ex].ty0 = Number(Date.now());
 
-        train.t0 = Number(Date.now());
+        trainArr[ex].t0 = Number(Date.now());
 
         draw();
     }
@@ -214,13 +210,13 @@ loadImages(sources, function (images) {
     function restartTime() {
         n = 0;
         let trn = Number(Date.now());
-        basketball.tx0 = trn;
-        basketball.ty0 = trn;
-        train.t0 = trn;
-        basketball.x0 = basketball.x;
-        basketball.y0 = basketball.y;
-        if (basketball.dropped) { basketball.vy = G * basketball.ty; }
-        train.x0 = train.x;
+        basketballArr[ex].tx0 = trn;
+        basketballArr[ex].ty0 = trn;
+        trainArr[ex].t0 = trn;
+        basketballArr[ex].x0 = basketballArr[ex].x;
+        basketballArr[ex].y0 = basketballArr[ex].y;
+        if (basketballArr[ex].dropped) { basketballArr[ex].vy = G * basketballArr[ex].ty; }
+        trainArr[ex].x0 = trainArr[ex].x;
     }
 
     startBtn.addEventListener("click", () => {
@@ -249,8 +245,6 @@ loadImages(sources, function (images) {
     for (let i = 0; i < exampleBtns.length; i++) {
         exampleBtns[i].addEventListener("click", () => {
             ex = i;
-            basketball = Object.assign(basketball, ballArr[i]);
-            train = Object.assign(train, trainArr[i]);
             go = false;
             document.getElementById("ex").textContent = "Example " + (i + 1) + ": ";
             message.textContent = messages[i];
