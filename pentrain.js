@@ -143,7 +143,20 @@ loadImages(sources, function (images) {
         basketball.dropped = true;
     }
 
-    function draw() {
+
+    let start;
+
+    function draw(time) {
+
+        if (start === undefined) {
+            start = time;
+        }
+        
+        const t = time - start;
+        console.log(t);
+
+
+
         main_ctx.clearRect(0, 0, main_layer.width, main_layer.height);
 
         if (go) {
@@ -185,7 +198,7 @@ loadImages(sources, function (images) {
         train.draw();
         basketball.draw();
 
-        raf = window.requestAnimationFrame(draw);
+        window.requestAnimationFrame(draw);
     }
 
     function initialize() {
